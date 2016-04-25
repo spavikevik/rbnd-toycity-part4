@@ -1,6 +1,7 @@
 require_relative 'udacidata'
 
 class Product < Udacidata
+  @@products = []
   attr_reader :id, :price, :brand, :name
 
   def initialize(opts={})
@@ -15,6 +16,20 @@ class Product < Udacidata
     @brand = opts[:brand]
     @name = opts[:name]
     @price = opts[:price]
+  end
+
+  def self.create(opts={})
+    product = Product.new(opts)
+    file = File.dirname(__FILE__) + "/../data/data.csv"
+    CSV.open(file, "a+") do |csv|
+      csv << ["#{product.id}", "#{product.brand}", "#{product.name}", "#{product.price}"]
+    end
+    @@products << product
+    return product
+  end
+
+  def self.all
+    @@products
   end
 
   private
