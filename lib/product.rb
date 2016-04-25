@@ -22,14 +22,20 @@ class Product < Udacidata
     product = Product.new(opts)
     file = File.dirname(__FILE__) + "/../data/data.csv"
     CSV.open(file, "a+") do |csv|
-      csv << ["#{product.id}", "#{product.brand}", "#{product.name}", "#{product.price}"]
+      csv << ["#{product.id}", "#{product.brand}", "#{product.name}", "#{product.price}"] unless csv.map{|record| record.first.to_i}.include?(product.id)
     end
-    @@products << product
     return product
   end
 
   def self.all
-    @@products
+    file = File.dirname(__FILE__) + "/../data/data.csv"
+    CSV.open(file, "a+") do |csv|
+      @@products = csv.drop(1).map{|record| Product.new(id: record[0], brand: record[1], name: record[2], price: record[3])}
+    end
+  end
+
+  def self.first
+    @@products.first
   end
 
   private
