@@ -2,7 +2,7 @@ require_relative 'udacidata'
 
 class Product < Udacidata
   attr_reader :id, :price, :brand, :name
-
+  create_finder_methods :name, :brand
   def initialize(opts={})
 
     # Get last ID from the database if ID exists
