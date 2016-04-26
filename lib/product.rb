@@ -1,7 +1,7 @@
 require_relative 'udacidata'
 
 class Product < Udacidata
-  attr_reader :id, :price, :brand, :name
+  attr_accessor :id, :price, :brand, :name
   create_finder_methods :name, :brand
   def initialize(opts={})
 
@@ -15,6 +15,19 @@ class Product < Udacidata
     @brand = opts[:brand]
     @name = opts[:name] || opts[:product]
     @price = opts[:price]
+  end
+
+  def update(opts = {})
+    @brand = opts[:brand]
+    @name = opts[:name] || opts[:product]
+    @price = opts[:price]
+    table = Product.load_csv
+    table[self.id] = [self.id, self.brand, self.name, self.price]
+    file = File.dirname(__FILE__) + "/../data/data.csv"
+    File.open(file, 'w') do |f|
+      f.write(table.to_csv)
+    end
+    return self
   end
 
   def self.create(opts={})
@@ -41,6 +54,11 @@ class Product < Udacidata
 
   def self.find(id)
     all.fetch(id-1)
+  end
+
+  def self.where(opts={})
+    key, val = opts.first
+    all.select{|product| product.send(key) == val}
   end
 
   def self.destroy(id)
@@ -71,6 +89,5 @@ class Product < Udacidata
     def self.load_csv
       file = File.dirname(__FILE__) + "/../data/data.csv"
       return CSV.table(file)
-    end
-
+    end      
 end

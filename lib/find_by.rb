@@ -5,7 +5,7 @@ class Module
     attributes.each do |attribute|
       finder_method = %Q{
         def find_by_#{attribute}(val)
-          #{self}.all.select{|p| p.#{attribute} == val}.first
+          #{self}.all.select{|object| object.#{attribute} == val}.first
         end
       }
       instance_eval(finder_method)
