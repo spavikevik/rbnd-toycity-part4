@@ -1,8 +1,7 @@
 require_relative 'udacidata'
 
 class Product < Udacidata
-  attr_accessor :id, :price, :brand, :name
-  create_finder_methods :name, :brand
+  attr_reader :id, :price, :brand, :name
   def initialize(opts={})
 
     # Get last ID from the database if ID exists
@@ -15,60 +14,6 @@ class Product < Udacidata
     @brand = opts[:brand]
     @name = opts[:name] || opts[:product]
     @price = opts[:price]
-  end
-
-  def update(opts = {})
-    @brand = opts[:brand]
-    @name = opts[:name] || opts[:product]
-    @price = opts[:price]
-    table = Product.load_csv
-    table[self.id] = [self.id, self.brand, self.name, self.price]
-    file = File.dirname(__FILE__) + "/../data/data.csv"
-    File.open(file, 'w') do |f|
-      f.write(table.to_csv)
-    end
-    return self
-  end
-
-  def self.create(opts={})
-    product = Product.new(opts)
-    file = File.dirname(__FILE__) + "/../data/data.csv"
-    CSV.open(file, "a+") do |csv|
-      csv << ["#{product.id}", "#{product.brand}", "#{product.name}", "#{product.price}"] unless csv.map{|record| record.first.to_i}.include?(product.id)
-    end
-    return product
-  end
-
-  def self.all
-    csv = load_csv
-    csv.map{|record| Product.new(record.to_h)}
-  end
-
-  def self.first(n=1)
-    n > 1 ? all.take(n) : all.first
-  end
-
-  def self.last(n=1)
-    n > 1 ? all.reverse.take(n) : all.last
-  end
-
-  def self.find(id)
-    all.fetch(id-1)
-  end
-
-  def self.where(opts={})
-    key, val = opts.first
-    all.select{|product| product.send(key) == val}
-  end
-
-  def self.destroy(id)
-    file = File.dirname(__FILE__) + "/../data/data.csv"
-    table = load_csv
-    deleted = table.delete(id-1).to_h
-    File.open(file, 'w') do |f|
-      f.write(table.to_csv)
-    end
-    Product.new(deleted)
   end
 
   private
@@ -85,9 +30,4 @@ class Product < Udacidata
     def auto_increment
       @@count_class_instances += 1
     end
-
-    def self.load_csv
-      file = File.dirname(__FILE__) + "/../data/data.csv"
-      return CSV.table(file)
-    end      
 end
