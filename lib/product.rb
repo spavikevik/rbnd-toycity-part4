@@ -1,7 +1,6 @@
 require_relative 'udacidata'
 
 class Product < Udacidata
-  @@products = []
   attr_reader :id, :price, :brand, :name
 
   def initialize(opts={})
@@ -14,7 +13,7 @@ class Product < Udacidata
     auto_increment if !opts[:id]
     # Set the brand, name, and price normally
     @brand = opts[:brand]
-    @name = opts[:name]
+    @name = opts[:name] || opts[:product]
     @price = opts[:price]
   end
 
@@ -28,14 +27,30 @@ class Product < Udacidata
   end
 
   def self.all
-    file = File.dirname(__FILE__) + "/../data/data.csv"
-    CSV.open(file, "a+") do |csv|
-      @@products = csv.drop(1).map{|record| Product.new(id: record[0], brand: record[1], name: record[2], price: record[3])}
-    end
+    csv = load_csv
+    csv.map{|record| Product.new(record.to_h)}
   end
 
-  def self.first
-    @@products.first
+  def self.first(n=1)
+    n > 1 ? all.take(n) : all.first
+  end
+
+  def self.last(n=1)
+    n > 1 ? all.reverse.take(n) : all.last
+  end
+
+  def self.find(id)
+    all.fetch(id-1)
+  end
+
+  def self.destroy(id)
+    file = File.dirname(__FILE__) + "/../data/data.csv"
+    table = load_csv
+    deleted = table.delete(id-1).to_h
+    File.open(file, 'w') do |f|
+      f.write(table.to_csv)
+    end
+    Product.new(deleted)
   end
 
   private
@@ -51,6 +66,11 @@ class Product < Udacidata
 
     def auto_increment
       @@count_class_instances += 1
+    end
+
+    def self.load_csv
+      file = File.dirname(__FILE__) + "/../data/data.csv"
+      return CSV.table(file)
     end
 
 end
