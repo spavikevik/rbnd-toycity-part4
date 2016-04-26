@@ -8,13 +8,13 @@ class Udacidata
   create_finder_methods :name, :brand
 
   def update(opts = {})
-    @brand = opts[:brand] || @brand
-    @name = opts[:name] || opts[:product] || @name
-    @price = opts[:price] || @price
-    table = self.class.load_csv
-    table[self.id] = [self.id, self.brand, self.name, self.price]
-    self.class.write_csv(table)
-    return self
+    new_brand = opts[:brand] || @brand
+    new_name = opts[:name] || opts[:product] || @name
+    new_price = opts[:price] || @price
+    new_id = @id
+    new_opts = Hash(id: new_id, brand: new_brand, name: new_name, price: new_price)
+    Udacidata.destroy(new_id)
+    return Product.create new_opts
   end
 
   def self.create(opts={})
@@ -39,9 +39,9 @@ class Udacidata
   end
 
   def self.find(id)
-    list = all
-    raise ProductNotFoundError, "Product ID does not exist!" if id > list.count
-    list.fetch(id-1)
+    product_found = all.find{|product| product.id == id}
+    raise ProductNotFoundError, "Product ID does not exist!" if id > all.count || !product_found
+    product_found
   end
 
   def self.where(opts={})
@@ -51,10 +51,13 @@ class Udacidata
 
   def self.destroy(id)
     table = self.load_csv
-    raise ProductNotFoundError, "Product ID does not exist!" if id > table.count
-    deleted = table.delete(id-1).to_h
+    product_found = all.find{|product| product.id == id}
+    raise ProductNotFoundError, "Product ID does not exist!" if id > table.count || !product_found
+    table.delete_if do |row|
+      row[:id] == id
+    end
     self.write_csv(table)
-    self.new(deleted)
+    product_found
   end
 
   private
