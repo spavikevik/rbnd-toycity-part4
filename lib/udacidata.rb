@@ -8,9 +8,9 @@ class Udacidata
   create_finder_methods :name, :brand
 
   def update(opts = {})
-    @brand = opts[:brand]
-    @name = opts[:name] || opts[:product]
-    @price = opts[:price]
+    @brand = opts[:brand] || @brand
+    @name = opts[:name] || opts[:product] || @name
+    @price = opts[:price] || @price
     table = self.class.load_csv
     table[self.id] = [self.id, self.brand, self.name, self.price]
     self.class.write_csv(table)
