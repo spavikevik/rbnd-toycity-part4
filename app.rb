@@ -1,6 +1,7 @@
 require_relative 'lib/analyzable'
 require_relative 'lib/product'
 require_relative 'data/schema'
+require 'bundler/setup'
 
 include Analyzable
 

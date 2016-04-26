@@ -15,4 +15,5 @@ module Analyzable
   def count_by_brand(entries)
     entries.group_by{|e| e.brand}.map{|brand, entries| [brand, entries.count]}.to_h
   end
+
 end
