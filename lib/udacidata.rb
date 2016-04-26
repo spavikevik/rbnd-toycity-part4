@@ -39,7 +39,9 @@ class Udacidata
   end
 
   def self.find(id)
-    all.fetch(id-1)
+    list = all
+    raise ProductNotFoundError, "Product ID does not exist!" if id > list.count
+    list.fetch(id-1)
   end
 
   def self.where(opts={})
@@ -49,6 +51,7 @@ class Udacidata
 
   def self.destroy(id)
     table = self.load_csv
+    raise ProductNotFoundError, "Product ID does not exist!" if id > table.count
     deleted = table.delete(id-1).to_h
     self.write_csv(table)
     self.new(deleted)
